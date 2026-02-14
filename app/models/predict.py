@@ -56,112 +56,190 @@ def get_primary_driver(features: dict) -> str:
 
 
 # ─────────────────────────────────────────
+# RISK BAND CLASSIFICATION
+# ─────────────────────────────────────────
+
+def get_risk_band(pd_pct: float) -> dict:
+    """Classify customer into risk bands for monitoring priority"""
+    if pd_pct <= 10:
+        return {
+            "band": "LOW_RISK",
+            "color": "green",
+            "monitoring_frequency": "monthly",
+            "priority": "LOW"
+        }
+    elif pd_pct <= 25:
+        return {
+            "band": "MEDIUM_RISK",
+            "color": "yellow",
+            "monitoring_frequency": "weekly",
+            "priority": "MEDIUM"
+        }
+    elif pd_pct <= 50:
+        return {
+            "band": "HIGH_RISK",
+            "color": "orange",
+            "monitoring_frequency": "daily",
+            "priority": "HIGH"
+        }
+    else:
+        return {
+            "band": "CRITICAL_RISK",
+            "color": "red",
+            "monitoring_frequency": "immediate",
+            "priority": "CRITICAL"
+        }
+
+
+# ─────────────────────────────────────────
 # INTERVENTION LOGIC
 # ─────────────────────────────────────────
 
 def get_intervention(primary_driver: str, pd_pct: float, features: dict) -> dict:
-    """Rule-based intervention — no AI hallucination risk"""
+    """Determine intervention strategy based on risk drivers"""
 
+    # No intervention needed for very low risk
     if pd_pct <= 10:
-        return {"recommended": False, "type": "none", "message": "No intervention needed."}
+        return {
+            "required": False,
+            "urgency": "NONE",
+            "type": "monitoring_only",
+            "message": "Customer is in good financial health. Continue routine monitoring.",
+            "actions": []
+        }
 
+    # Map drivers to specific interventions
     interventions = {
         "F3_lending_app_score": {
             "type": "debt_consolidation",
-            "urgency": "HIGH" if pd_pct > 20 else "MEDIUM",
+            "urgency": "HIGH" if pd_pct > 30 else "MEDIUM",
             "message": (
-                "You appear to be managing multiple loan apps. "
-                "We can consolidate these into one lower EMI loan. "
-                "Speak to your relationship manager today."
-            ),
+                "Customer is managing multiple loan apps totaling ₹{:.0f}. "
+                "Recommend debt consolidation into single lower EMI loan."
+            ).format(features.get("F3_lending_app_score", 0) * 30000),
+            "actions": [
+                "Schedule call with relationship manager within 48 hours",
+                "Offer debt consolidation product",
+                "Calculate consolidated EMI and savings"
+            ]
         },
         "F5_salary_delay": {
-            "type": "emi_postponement",
+            "type": "emi_restructuring",
             "urgency": "MEDIUM",
             "message": (
-                "We noticed your salary credit is delayed this month. "
-                "We can shift your EMI due date by 7 days at no extra cost."
-            ),
+                "Salary credit delayed by {} days. "
+                "Offer EMI date postponement or payment holiday."
+            ).format(int(features.get("F5_salary_delay", 0) * 30)),
+            "actions": [
+                "Verify salary credit date with customer",
+                "Offer 7-day EMI postponement",
+                "Set up salary day alerts"
+            ]
         },
         "F4_savings_depletion": {
             "type": "tenure_extension",
-            "urgency": "MEDIUM",
+            "urgency": "MEDIUM" if pd_pct < 30 else "HIGH",
             "message": (
-                "Your savings balance has been declining. "
-                "We can extend your loan tenure to reduce your monthly burden."
-            ),
+                "Savings depleted by {:.0f}% in last 30 days. "
+                "Recommend loan tenure extension to reduce monthly burden."
+            ).format(features.get("F4_savings_depletion", 0) * 100),
+            "actions": [
+                "Offer tenure extension (reduce EMI by 20-30%)",
+                "Provide financial planning guidance",
+                "Set up savings threshold alerts"
+            ]
         },
         "F8_stress_velocity": {
             "type": "financial_counseling",
-            "urgency": "HIGH",
+            "urgency": "HIGH" if pd_pct > 30 else "MEDIUM",
             "message": (
-                "Our system has detected rapidly increasing financial stress. "
-                "A free financial counseling session is available for you."
-            ),
+                "Financial stress is rapidly increasing (velocity: {:.3f}). "
+                "Immediate counseling recommended to prevent default."
+            ).format(features.get("F8_stress_velocity", 0)),
+            "actions": [
+                "Schedule urgent financial counseling session",
+                "Review all loan obligations",
+                "Create debt management plan",
+                "Consider emergency restructuring options"
+            ]
         },
         "F6_autodebit_fail": {
-            "type": "balance_alert",
+            "type": "payment_assistance",
             "urgency": "MEDIUM",
             "message": (
-                "Your auto-debit payments have been failing due to low balance. "
-                "Set up a low-balance alert to avoid missed payments."
-            ),
+                "Auto-debit failure rate: {:.0f}%. "
+                "Set up balance alerts and payment reminders."
+            ).format(features.get("F6_autodebit_fail", 0) * 100),
+            "actions": [
+                "Enable low-balance SMS alerts",
+                "Offer payment date flexibility",
+                "Set up pre-debit reminders (3 days before)"
+            ]
         },
+        "F1_debt_burden": {
+            "type": "debt_restructuring",
+            "urgency": "HIGH",
+            "message": (
+                "Debt burden at {:.0f}% of income (healthy limit: 40%). "
+                "Restructuring required to prevent default."
+            ).format(features.get("F1_debt_burden", 0) * 100),
+            "actions": [
+                "Immediate review of all debt obligations",
+                "Restructure high-interest loans first",
+                "Consider top-up loan for consolidation"
+            ]
+        },
+        "F7_spending_cuts": {
+            "type": "budget_counseling",
+            "urgency": "MEDIUM",
+            "message": (
+                "Discretionary spending cut by {:.0f}%. "
+                "Customer may be facing cash flow issues."
+            ).format(features.get("F7_spending_cuts", 0) * 100),
+            "actions": [
+                "Offer financial planning assistance",
+                "Review income sources",
+                "Discuss emergency fund creation"
+            ]
+        }
     }
 
+    # Default intervention for unlisted drivers
     default_intervention = {
-        "type": "general_support",
-        "urgency": "LOW",
-        "message": "Please contact your relationship manager for support.",
+        "type": "relationship_manager_review",
+        "urgency": "HIGH" if pd_pct > 30 else "MEDIUM",
+        "message": (
+            "Customer showing elevated default risk ({:.1f}%). "
+            "Relationship manager review recommended."
+        ).format(pd_pct),
+        "actions": [
+            "Schedule call with relationship manager",
+            "Review account activity in detail",
+            "Assess intervention options"
+        ]
     }
 
     intervention = interventions.get(primary_driver, default_intervention)
-    return {"recommended": True, **intervention}
-
-
-# ─────────────────────────────────────────
-# BAND & LOAN TERMS
-# ─────────────────────────────────────────
-
-def get_loan_terms(pd_pct: float, requested_amount: float) -> dict:
-    if pd_pct <= 10:
-        return {
-            "band": "BAND_1",
-            "decision": "APPROVED",
-            "approved_amount": requested_amount,
-            "approval_pct": 100,
-            "interest_rate": 12.0,
-            "processing_fee": 0,
-        }
-    elif pd_pct <= 20:
-        return {
-            "band": "BAND_2",
-            "decision": "APPROVED_WITH_CONDITIONS",
-            "approved_amount": round(requested_amount * 0.70, 2),
-            "approval_pct": 70,
-            "interest_rate": 15.0,
-            "processing_fee": 500,
-        }
-    else:
-        return {
-            "band": "BAND_3",
-            "decision": "REJECTED",
-            "approved_amount": 0,
-            "approval_pct": 0,
-            "interest_rate": 0,
-            "processing_fee": 0,
-        }
+    
+    return {
+        "required": True,
+        **intervention
+    }
 
 
 # ─────────────────────────────────────────
 # MAIN PREDICTION FUNCTION
 # ─────────────────────────────────────────
 
-def predict(features: dict, requested_amount: float = 300000) -> dict:
+def predict(features: dict, requested_amount: float = 0) -> dict:
     """
-    Full dual-track prediction pipeline.
+    Pre-Delinquency Intervention Engine - Main Prediction Pipeline
+    
+    Purpose: Monitor existing customers and trigger early interventions
+    NOT for new loan approvals - for existing loan portfolio monitoring
+    
     Input:  features dict (10 features)
-    Output: complete risk assessment + decision + intervention
+    Output: risk assessment + intervention recommendations
     """
 
     # ── Track 1: XGBoost (all customers) ──
@@ -183,18 +261,25 @@ def predict(features: dict, requested_amount: float = 300000) -> dict:
         risk_deep = None
         final_pd = risk_fast
 
-    # Calibration nudge
+    # Calibration
     calibrated_pd = float(np.clip(0.05 + 0.90 * final_pd, 0.01, 0.99))
     pd_pct = round(calibrated_pd * 100, 1)
 
-    # ── Decision ──
-    loan_terms = get_loan_terms(pd_pct, requested_amount)
+    # ── Risk Classification ──
+    risk_band = get_risk_band(pd_pct)
 
     # ── SHAP-style primary driver ──
     primary_driver = get_primary_driver(features)
 
-    # ── Intervention ──
+    # ── Intervention Strategy ──
     intervention = get_intervention(primary_driver, pd_pct, features)
+
+    # ── Trend Analysis (comparing stress velocity) ──
+    stress_velocity = features.get("F8_stress_velocity", 0)
+    trend = "RAPIDLY_INCREASING" if stress_velocity > 0.08 else \
+            "INCREASING" if stress_velocity > 0.04 else \
+            "STABLE" if stress_velocity > -0.02 else \
+            "IMPROVING"
 
     return {
         "pd_pct": pd_pct,
@@ -202,6 +287,16 @@ def predict(features: dict, requested_amount: float = 300000) -> dict:
         "risk_deep_pct": round(risk_deep * 100, 1) if risk_deep else None,
         "track2_activated": track2_activated,
         "primary_driver": primary_driver,
-        "loan_terms": loan_terms,
+        "risk_classification": risk_band,
+        "stress_trend": trend,
         "intervention": intervention,
+        # Legacy support (can be removed later)
+        "loan_terms": {
+            "band": risk_band["band"],
+            "decision": "INTERVENTION_" + intervention["urgency"],
+            "approved_amount": 0,
+            "approval_pct": 0,
+            "interest_rate": 0,
+            "processing_fee": 0
+        }
     }
