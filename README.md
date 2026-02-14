@@ -175,14 +175,9 @@ PDIE-Hackathon/
 ✅ **Explainable** - SHAP values for compliance  
 
 ---
+Name : Mrunal Khadke 
 
-## 📞 Contact
-
-**Developer:** [Your Name]  
-**GitHub:** [@mk26-coder-sudo](https://github.com/mk26-coder-sudo)  
-**Email:** [your-email@example.com]
-
----
+Name : Nidhi Shah
 
 <div align="center">
 
