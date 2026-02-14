@@ -124,7 +124,8 @@ def predict_risk(customer: CustomerRequest):
                 "primary_driver": result["primary_driver"],
             },
 
-            "decision": result["loan_terms"],
+            "risk_classification": result["risk_classification"],
+            "stress_trend": result["stress_trend"],
             "intervention": result["intervention"],
 
             "features": features,
