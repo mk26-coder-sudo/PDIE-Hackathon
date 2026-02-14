@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDIE Dashboard - Pre-Delinquency Intervention Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .section-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group small {
+            color: #999;
+            font-size: 0.8em;
+            margin-top: 3px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            font-size: 0.9em;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .preset-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-2px);
+        }
+
+        .preset-btn strong {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .preset-btn small {
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .test-cases-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .test-case-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .test-case-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .test-case-info {
+            flex: 1;
+        }
+
+        .test-case-info strong {
+            display: block;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .test-case-info small {
+            color: #666;
+        }
+
+        .test-case-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .btn-test {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-test:hover {
+            background: #218838;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-container.show {
+            display: block;
+        }
+
+        .result-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .result-section:last-child {
+            border-bottom: none;
+        }
+
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .decision-box {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .decision-approved {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .decision-conditional {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        .decision-rejected {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+        }
+
+        .intervention-alert {
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .intervention-alert h4 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .feature-bar {
+            margin: 10px 0;
+        }
+
+        .feature-bar-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .feature-bar-track {
+            height: 25px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .feature-bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .bar-green { background: linear-gradient(90deg, #4caf50, #8bc34a); }
+        .bar-yellow { background: linear-gradient(90deg, #ffc107, #ff9800); }
+        .bar-red { background: linear-gradient(90deg, #ff5722, #f44336); }
+
+        .primary-driver {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 87, 34, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(255, 87, 34, 0); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .api-info {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .api-info a {
+            color: #fff;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .test-all-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 PDIE Dashboard</h1>
+            <p>Pre-Delinquency Intervention Engine - Real-Time Risk Analysis</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel: Add Test Case -->
+            <div class="section-card">
+                <h2>📝 Add Test Case</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <strong style="display: block; margin-bottom: 10px; color: #666;">Quick Presets:</strong>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="loadPreset('critical')">
+                            <strong>🔴 Critical Risk</strong>
+                            <small>High EMI, multiple apps</small>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('low')">
+                            <strong>🟢 Low Risk</strong>
+                            <small>Stable income, no apps</small>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('medium')">
+                            <strong>🟡 Medium Risk</strong>
+                            <small>Some warning signs</small>
+                        </button>
+                    </div>
+                </div>
+
+                <form id="customerForm">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Customer ID *</label>
+                            <input type="text" id="customer_id" required placeholder="CUST_001">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label>Customer Name *</label>
+                            <input type="text" id="customer_name" required placeholder="Rahul Verma">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Monthly Income (₹) *</label>
+                            <input type="number" id="income" required placeholder="50000">
+                            <small>Regular monthly income</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Monthly EMI (₹) *</label>
+                            <input type="number" id="emi" required placeholder="10000">
+                            <small>Existing loan EMI</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Income Volatility (₹)</label>
+                            <input type="number" id="income_std" placeholder="2000">
+                            <small>Standard deviation</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Requested Loan (₹)</label>
+                            <input type="number" id="requested_loan_amount" placeholder="300000">
+                            <small>New loan amount</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Current Balance (₹) *</label>
+                            <input type="number" id="balance_now" required placeholder="25000">
+                            <small>Account balance today</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Balance 30 Days Ago (₹) *</label>
+                            <input type="number" id="balance_30d_ago" required placeholder="30000">
+                            <small>For savings trend</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Expected Salary Day</label>
+                            <input type="number" id="expected_salary_day" placeholder="5" min="1" max="31">
+                            <small>Day of month</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Actual Salary Day</label>
+                            <input type="number" id="actual_salary_day" placeholder="5" min="1" max="31">
+                            <small>When salary arrived</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Failed Auto-Debits</label>
+                            <input type="number" id="failed_debits" placeholder="0" min="0">
+                            <small>In last 3 months</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Total Auto-Debits</label>
+                            <input type="number" id="total_debits" placeholder="10" min="0">
+                            <small>Total attempted</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Usual Spending (₹)</label>
+                            <input type="number" id="usual_discretionary_spend" placeholder="12000">
+                            <small>Average discretionary</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>This Month Spending (₹)</label>
+                            <input type="number" id="this_month_discretionary_spend" placeholder="10000">
+                            <small>Current month</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Number of Loan Apps</label>
+                            <input type="number" id="num_lending_apps" placeholder="0" min="0">
+                            <small>Active loan apps</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Total App Amount (₹)</label>
+                            <input type="number" id="total_app_amount" placeholder="0">
+                            <small>Sum of app loans</small>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Neighborhood Default Rate</label>
+                            <input type="number" id="neighborhood_default_rate" placeholder="0.05" step="0.01" min="0" max="1">
+                            <small>e.g., 0.05 = 5% default rate</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">➕ Add Test Case</button>
+                </form>
+            </div>
+
+            <!-- Right Panel: Test Cases List -->
+            <div class="section-card">
+                <h2>🧪 Test Cases <span class="badge badge-success" id="testCaseCount">0</span></h2>
+                
+                <div id="testCasesList" class="test-cases-list">
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p>No test cases yet</p>
+                        <small>Add a test case or use a preset</small>
+                    </div>
+                </div>
+
+                <div class="test-all-section" id="testAllSection" style="display: none;">
+                    <button class="btn-primary" onclick="testAllCases()">
+                        🚀 Test All Cases
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="api-info">
+            <p>🚀 API Endpoint: <a href="/docs" target="_blank">Interactive Documentation</a></p>
+            <p>📖 Using API: POST /predict</p>
+        </div>
+
+        <div id="resultsContainer" class="results-container"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/predict';
+        let testCases = [];
+
+        const presets = {
+            critical: {
+                customer_id: "CUST_CRITICAL_" + Date.now(),
+                customer_name: "High Risk Customer",
+                income: 35000,
+                emi: 15000,
+                income_std: 8000,
+                requested_loan_amount: 200000,
+                balance_now: 5000,
+                balance_30d_ago: 28000,
+                expected_salary_day: 5,
+                actual_salary_day: 12,
+                failed_debits: 4,
+                total_debits: 10,
+                usual_discretionary_spend: 12000,
+                this_month_discretionary_spend: 4000,
+                num_lending_apps: 5,
+                total_app_amount: 18000,
+                neighborhood_default_rate: 0.15
+            },
+            low: {
+                customer_id: "CUST_SAFE_" + Date.now(),
+                customer_name: "Low Risk Customer",
+                income: 80000,
+                emi: 8000,
+                income_std: 1000,
+                requested_loan_amount: 300000,
+                balance_now: 60000,
+                balance_30d_ago: 58000,
+                expected_salary_day: 5,
+                actual_salary_day: 5,
+                failed_debits: 0,
+                total_debits: 10,
+                usual_discretionary_spend: 15000,
+                this_month_discretionary_spend: 14000,
+                num_lending_apps: 0,
+                total_app_amount: 0,
+                neighborhood_default_rate: 0.03
+            },
+            medium: {
+                customer_id: "CUST_MEDIUM_" + Date.now(),
+                customer_name: "Medium Risk Customer",
+                income: 50000,
+                emi: 10000,
+                income_std: 3000,
+                requested_loan_amount: 250000,
+                balance_now: 25000,
+                balance_30d_ago: 30000,
+                expected_salary_day: 5,
+                actual_salary_day: 8,
+                failed_debits: 2,
+                total_debits: 10,
+                usual_discretionary_spend: 10000,
+                this_month_discretionary_spend: 7000,
+                num_lending_apps: 2,
+                total_app_amount: 8000,
+                neighborhood_default_rate: 0.08
+            }
+        };
+
+        function loadPreset(type) {
+            const preset = presets[type];
+            Object.keys(preset).forEach(key => {
+                const input = document.getElementById(key);
+                if (input) input.value = preset[key];
+            });
+        }
+
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                customer_id: document.getElementById('customer_id').value,
+                customer_name: document.getElementById('customer_name').value,
+                income: parseFloat(document.getElementById('income').value),
+                emi: parseFloat(document.getElementById('emi').value),
+                income_std: parseFloat(document.getElementById('income_std').value) || 1000,
+                requested_loan_amount: parseFloat(document.getElementById('requested_loan_amount').value) || 300000,
+                balance_now: parseFloat(document.getElementById('balance_now').value),
+                balance_30d_ago: parseFloat(document.getElementById('balance_30d_ago').value),
+                expected_salary_day: parseInt(document.getElementById('expected_salary_day').value) || 5,
+                actual_salary_day: parseInt(document.getElementById('actual_salary_day').value) || 5,
+                failed_debits: parseInt(document.getElementById('failed_debits').value) || 0,
+                total_debits: parseInt(document.getElementById('total_debits').value) || 10,
+                usual_discretionary_spend: parseFloat(document.getElementById('usual_discretionary_spend').value) || 10000,
+                this_month_discretionary_spend: parseFloat(document.getElementById('this_month_discretionary_spend').value) || 10000,
+                num_lending_apps: parseInt(document.getElementById('num_lending_apps').value) || 0,
+                total_app_amount: parseFloat(document.getElementById('total_app_amount').value) || 0,
+                neighborhood_default_rate: parseFloat(document.getElementById('neighborhood_default_rate').value) || 0.05
+            };
+
+            addTestCase(formData);
+            this.reset();
+        });
+
+        function addTestCase(data) {
+            testCases.push(data);
+            updateTestCasesList();
+            document.getElementById('testCaseCount').textContent = testCases.length;
+        }
+
+        function updateTestCasesList() {
+            const list = document.getElementById('testCasesList');
+            
+            if (testCases.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p>No test cases yet</p>
+                        <small>Add a test case or use a preset</small>
+                    </div>
+                `;
+                document.getElementById('testAllSection').style.display = 'none';
+                return;
+            }
+
+            list.innerHTML = testCases.map((tc, index) => {
+                const debtRatio = ((tc.emi / tc.income) * 100).toFixed(0);
+                return `
+                    <div class="test-case-item">
+                        <div class="test-case-info">
+                            <strong>${tc.customer_name}</strong>
+                            <small>
+                                Income: ₹${tc.income.toLocaleString()} | 
+                                EMI: ₹${tc.emi.toLocaleString()} (${debtRatio}%) | 
+                                Apps: ${tc.num_lending_apps}
+                            </small>
+                        </div>
+                        <div class="test-case-actions">
+                            <button class="btn-icon btn-test" onclick="testSingleCase(${index})">
+                                🔍 Test
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteTestCase(${index})">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('testAllSection').style.display = 'block';
+        }
+
+        function deleteTestCase(index) {
+            if (confirm('Delete this test case?')) {
+                testCases.splice(index, 1);
+                updateTestCasesList();
+                document.getElementById('testCaseCount').textContent = testCases.length;
+            }
+        }
+
+        async function testSingleCase(index) {
+            const testCase = testCases[index];
+            
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Analyzing customer risk...</p></div>';
+            resultsContainer.classList.add('show');
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testCase)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                displaySingleResult(result);
+
+            } catch (error) {
+                resultsContainer.innerHTML = `
+                    <div class="result-section">
+                        <h3 style="color: #dc3545;">❌ Error</h3>
+                        <p>Failed to analyze customer: ${error.message}</p>
+                        <button class="btn-primary" onclick="hideResults()">Close</button>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAllCases() {
+            if (testCases.length === 0) {
+                alert('Please add at least one test case first!');
+                return;
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Testing ${testCases.length} customers...</p>
+                </div>
+            `;
+            resultsContainer.classList.add('show');
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+
+            const results = [];
+
+            for (let i = 0; i < testCases.length; i++) {
+                try {
+                    resultsContainer.innerHTML = `
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Testing customer ${i + 1} of ${testCases.length}...</p>
+                        </div>
+                    `;
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(testCases[i])
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API Error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    results.push(result);
+
+                } catch (error) {
+                    results.push({
+                        error: true,
+                        customer_name: testCases[i].customer_name,
+                        message: error.message
+                    });
+                }
+            }
+
+            displayAllResults(results);
+        }
+
+        function displaySingleResult(result) {
+            const container = document.getElementById('resultsContainer');
+            
+            const riskPct = result.risk_assessment.pd_pct;
+            const decision = result.decision.decision;
+            const intervention = result.intervention;
+            const features = result.features;
+            
+            const decisionClass = decision.includes('APPROVED') && !decision.includes('CONDITIONS') ? 'decision-approved' :
+                                 decision.includes('CONDITIONS') ? 'decision-conditional' : 'decision-rejected';
+            
+            const decisionIcon = decision.includes('APPROVED') && !decision.includes('CONDITIONS') ? '✅' :
+                                decision.includes('CONDITIONS') ? '⚠️' : '❌';
+            
+            let html = `
+                <div class="result-section">
+                    <h3>📊 Customer: ${result.customer_name}</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Customer ID</span>
+                        <span class="metric-value">${result.customer_id}</span>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h3>🎯 Risk Assessment</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Default Probability</span>
+                        <span class="metric-value" style="color: ${riskPct > 50 ? '#dc3545' : riskPct > 25 ? '#ffc107' : '#28a745'};">
+                            ${riskPct}%
+                        </span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Risk Band</span>
+                        <span class="metric-value">${result.decision.band}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Primary Risk Driver</span>
+                        <span class="metric-value" style="color: #ff5722;">${result.risk_assessment.primary_driver}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Track 1 (XGBoost)</span>
+                        <span class="metric-value">${result.risk_assessment.track1_xgboost_pct}%</span>
+                    </div>
+                    ${result.risk_assessment.track2_activated ? `
+                    <div class="metric-row" style="background: #fff3cd;">
+                        <span class="metric-label">🔬 Track 2 (LightGBM) ACTIVATED</span>
+                        <span class="metric-value">${result.risk_assessment.track2_lightgbm_pct}%</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <div class="result-section">
+                    <h3>💼 Loan Decision</h3>
+                    <div class="decision-box ${decisionClass}">
+                        <strong>${decisionIcon} ${decision}</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Approved Amount</span>
+                        <span class="metric-value">₹${result.decision.approved_amount.toLocaleString()}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Interest Rate</span>
+                        <span class="metric-value">${result.decision.interest_rate}%</span>
+                    </div>
+                </div>
+            `;
+            
+            if (intervention.recommended) {
+                html += `
+                    <div class="result-section">
+                        <h3>🚨 Intervention Required</h3>
+                        <div class="intervention-alert">
+                            <h4>Priority: ${intervention.urgency}</h4>
+                            <p><strong>Type:</strong> ${intervention.type.replace(/_/g, ' ').toUpperCase()}</p>
+                            <p style="margin-top: 10px;">${intervention.message}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                <div class="result-section">
+                    <h3>📈 Feature Analysis</h3>
+            `;
+            
+            const primaryDriver = result.risk_assessment.primary_driver;
+            
+            Object.entries(features).forEach(([key, value]) => {
+                const percentage = Math.min(value * 100, 100);
+                const barColor = percentage > 70 ? 'bar-red' : percentage > 40 ? 'bar-yellow' : 'bar-green';
+                const isPrimary = key === primaryDriver;
+                
+                html += `
+                    <div class="feature-bar ${isPrimary ? 'primary-driver' : ''}">
+                        <div class="feature-bar-label">
+                            <span><strong>${key}</strong>${isPrimary ? ' 🎯 PRIMARY DRIVER' : ''}</span>
+                            <span>${value.toFixed(3)}</span>
+                        </div>
+                        <div class="feature-bar-track">
+                            <div class="feature-bar-fill ${barColor}" style="width: ${percentage}%">
+                                ${percentage.toFixed(0)}%
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                </div>
+                <button class="btn-primary" onclick="hideResults()">✓ Close Results</button>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function displayAllResults(results) {
+            const container = document.getElementById('resultsContainer');
+            
+            const summary = {
+                total: results.length,
+                approved: 0,
+                conditional: 0,
+                rejected: 0,
+                avgRisk: 0
+            };
+
+            results.forEach(r => {
+                if (r.error) return;
+                summary.avgRisk += r.risk_assessment.pd_pct;
+                if (r.decision.decision.includes('APPROVED') && !r.decision.decision.includes('CONDITIONS')) {
+                    summary.approved++;
+                } else if (r.decision.decision.includes('CONDITIONS')) {
+                    summary.conditional++;
+                } else {
+                    summary.rejected++;
+                }
+            });
+
+            summary.avgRisk = (summary.avgRisk / results.length).toFixed(1);
+
+            let html = `
+                <div class="result-section">
+                    <h3>📊 Batch Test Summary</h3>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Customers Tested</span>
+                        <span class="metric-value">${summary.total}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">✅ Approved</span>
+                        <span class="metric-value" style="color: #28a745;">${summary.approved}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">⚠️ Conditional</span>
+                        <span class="metric-value" style="color: #ffc107;">${summary.conditional}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">❌ Rejected</span>
+                        <span class="metric-value" style="color: #dc3545;">${summary.rejected}</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Average Risk</span>
+                        <span class="metric-value">${summary.avgRisk}%</span>
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h3>📋 Individual Results</h3>
+            `;
+
+            results.forEach((result, index) => {
+                if (result.error) {
+                    html += `
+                        <div class="metric-row" style="background: #f8d7da;">
+                            <span class="metric-label">${index + 1}. ${result.customer_name}</span>
+                            <span class="metric-value" style="color: #dc3545;">ERROR</span>
+                        </div>
+                    `;
+                } else {
+                    const decisionIcon = result.decision.decision.includes('APPROVED') && !result.decision.decision.includes('CONDITIONS') ? '✅' :
+                                       result.decision.decision.includes('CONDITIONS') ? '⚠️' : '❌';
+                    
+                    html += `
+                        <div class="metric-row">
+                            <div>
+                                <strong>${index + 1}. ${result.customer_name}</strong><br>
+                                <small>Risk: ${result.risk_assessment.pd_pct}% | Driver: ${result.risk_assessment.primary_driver}</small>
+                            </div>
+                            <span class="metric-value">${decisionIcon} ${result.decision.decision}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            html += `
+                </div>
+                <button class="btn-primary" onclick="hideResults()">✓ Close Results</button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        function hideResults() {
+            document.getElementById('resultsContainer').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

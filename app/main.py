@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
 import uvicorn
+from pathlib import Path
 
 from app.features import build_feature_vector
 from app.models.predict import predict
@@ -71,8 +73,27 @@ def root():
     return {
         "engine": "PDIE v2.5.1",
         "status": "running",
-        "docs": "/docs",
+        "endpoints": {
+            "dashboard": "/dashboard",
+            "api_docs": "/docs",
+            "predict": "/predict",
+            "health": "/health"
+        }
     }
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard():
+    """Serve the interactive dashboard"""
+    dashboard_path = Path(__file__).parent / "dashboard.html"
+    
+    if not dashboard_path.exists():
+        raise HTTPException(status_code=404, detail="Dashboard not found")
+    
+    with open(dashboard_path, "r", encoding="utf-8") as f:
+        html_content = f.read()
+    
+    return HTMLResponse(content=html_content)
 
 
 @app.get("/health")
