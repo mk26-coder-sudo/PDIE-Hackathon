@@ -8,18 +8,18 @@ import os
 
 TRACK1_FEATURES = [
     "F1_debt_burden",
-    "F2_income_volatility",
+    "F2_savings_drawdown",
     "F3_lending_app_score",
-    "F4_savings_depletion",
+    "F4_spending_decline",
     "F5_salary_delay",
     "F6_autodebit_fail",
-    "F7_spending_cuts",
+    "F7_cash_hoarding",
 ]
 
 TRACK2_FEATURES = TRACK1_FEATURES + [
     "F8_stress_velocity",
-    "F9_foresight_momentum",
-    "F10_neighborhood_risk",
+    "F9_payment_entropy",
+    "F10_cohort_stress",
 ]
 
 # ─────────────────────────────────────────
@@ -38,18 +38,17 @@ print("[INFO] Models loaded successfully ✓")
 # ─────────────────────────────────────────
 
 def get_primary_driver(features: dict) -> str:
-    """Find biggest risk contributor using SHAP-style weights"""
     weights = {
-        "F1_debt_burden":        0.25,
-        "F2_income_volatility":  0.10,
-        "F3_lending_app_score":  0.20,
-        "F4_savings_depletion":  0.15,
-        "F5_salary_delay":       0.08,
-        "F6_autodebit_fail":     0.12,
-        "F7_spending_cuts":      0.10,
-        "F8_stress_velocity":    2.50,  # ODE scaled up
-        "F9_foresight_momentum": 0.50,
-        "F10_neighborhood_risk": 0.30,
+        "F1_debt_burden":       0.20,
+        "F2_savings_drawdown":  0.18,
+        "F3_lending_app_score": 0.20,
+        "F4_spending_decline":  0.10,
+        "F5_salary_delay":      0.08,
+        "F6_autodebit_fail":    0.12,
+        "F7_cash_hoarding":     0.15,
+        "F8_stress_velocity":   2.50,
+        "F9_payment_entropy":   0.40,
+        "F10_cohort_stress":    0.25,
     }
     contributions = {k: weights[k] * features[k] for k in weights}
     return max(contributions, key=contributions.get)

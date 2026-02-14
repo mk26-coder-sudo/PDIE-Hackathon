@@ -34,34 +34,41 @@ class CustomerRequest(BaseModel):
     customer_id: str
     customer_name: str
 
-    # Financial basics
+    # Core financials
     income: float
     emi: float
-    income_std: float
-    requested_loan_amount: Optional[float] = 300000
+    income_std: Optional[float] = None
 
-    # Savings
+    # F2 — Savings
     balance_now: Optional[float] = None
     balance_30d_ago: Optional[float] = None
 
-    # Salary
-    expected_salary_day: Optional[int] = 5
-    actual_salary_day: Optional[int] = 5
-
-    # Auto-debit
-    failed_debits: Optional[int] = 0
-    total_debits: Optional[int] = 10
-
-    # Spending
-    usual_discretionary_spend: Optional[float] = None
-    this_month_discretionary_spend: Optional[float] = None
-
-    # Lending apps
+    # F3 — Lending apps
     num_lending_apps: Optional[int] = 0
     total_app_amount: Optional[float] = 0
 
-    # Neighborhood
-    neighborhood_default_rate: Optional[float] = 0.05
+    # F4 — Discretionary spending
+    usual_discretionary_spend: Optional[float] = None
+    this_month_discretionary_spend: Optional[float] = None
+
+    # F5 — Salary timing
+    expected_salary_day: Optional[int] = 1
+    actual_salary_day: Optional[int] = 1
+
+    # F6 — Auto-debit
+    failed_debits: Optional[int] = 0
+    total_debits: Optional[int] = 12
+
+    # F7 — ATM / Cash hoarding
+    usual_atm_withdrawal: Optional[float] = 5000
+    this_month_atm_withdrawal: Optional[float] = 5000
+
+    # F9 — Payment days (list of day-of-month)
+    payment_days: Optional[list] = []
+
+    # F10 — Cohort peer stress
+    cohort_default_rate: Optional[float] = 0.05
+
 
 
 # ─────────────────────────────────────────
