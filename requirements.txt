@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+asyncpg
+numpy
+scipy
+xgboost
+lightgbm
+shap
+pandas
+scikit-learn
+python-dotenv
+psycopg2-binary
+joblib
