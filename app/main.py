@@ -116,7 +116,7 @@ def predict_risk(customer: CustomerRequest):
         features = build_feature_vector(raw)
 
         # Step 2: Run dual-track prediction
-        result = predict(features, customer.requested_loan_amount)
+        result = predict(features, 0)
 
         # Step 3: Return full response
         return {
