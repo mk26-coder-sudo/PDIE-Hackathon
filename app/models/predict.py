@@ -282,6 +282,7 @@ def predict(features: dict, requested_amount: float = 0) -> dict:
 
     return {
         "pd_pct": pd_pct,
+        "prediction_window_weeks": 2 if pd_pct > 30 else 3,
         "risk_fast_pct": round(risk_fast_pct, 1),
         "risk_deep_pct": round(risk_deep * 100, 1) if risk_deep else None,
         "track2_activated": track2_activated,
@@ -289,8 +290,7 @@ def predict(features: dict, requested_amount: float = 0) -> dict:
         "risk_classification": risk_band,
         "stress_trend": trend,
         "intervention": intervention,
-        # Legacy support (can be removed later)
-        "loan_terms": {
+        "loan_terms": {  # For dashboard compatibility
             "band": risk_band["band"],
             "decision": "INTERVENTION_" + intervention["urgency"],
             "approved_amount": 0,
